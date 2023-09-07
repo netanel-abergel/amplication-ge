@@ -46,6 +46,9 @@ export class AppSettingControllerBase {
   @swagger.ApiForbiddenResponse({
     type: errors.ForbiddenException,
   })
+  @swagger.ApiBody({
+    type: AppSettingCreateInput,
+  })
   async create(
     @common.Body() data: AppSettingCreateInput
   ): Promise<AppSetting> {
@@ -134,6 +137,9 @@ export class AppSettingControllerBase {
   })
   @swagger.ApiForbiddenResponse({
     type: errors.ForbiddenException,
+  })
+  @swagger.ApiBody({
+    type: AppSettingUpdateInput,
   })
   async update(
     @common.Param() params: AppSettingWhereUniqueInput,
