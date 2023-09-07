@@ -16,7 +16,11 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { AppSettingService } from "../appSetting.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { AppSettingCreateInput } from "./AppSettingCreateInput";
 import { AppSettingWhereInput } from "./AppSettingWhereInput";
 import { AppSettingWhereUniqueInput } from "./AppSettingWhereUniqueInput";
@@ -24,10 +28,24 @@ import { AppSettingFindManyArgs } from "./AppSettingFindManyArgs";
 import { AppSettingUpdateInput } from "./AppSettingUpdateInput";
 import { AppSetting } from "./AppSetting";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class AppSettingControllerBase {
-  constructor(protected readonly service: AppSettingService) {}
+  constructor(
+    protected readonly service: AppSettingService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: AppSetting })
+  @nestAccessControl.UseRoles({
+    resource: "AppSetting",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async create(
     @common.Body() data: AppSettingCreateInput
   ): Promise<AppSetting> {
@@ -44,9 +62,18 @@ export class AppSettingControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [AppSetting] })
   @ApiNestedQuery(AppSettingFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "AppSetting",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async findMany(@common.Req() request: Request): Promise<AppSetting[]> {
     const args = plainToClass(AppSettingFindManyArgs, request.query);
     return this.service.findMany({
@@ -62,9 +89,18 @@ export class AppSettingControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: AppSetting })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "AppSetting",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async findOne(
     @common.Param() params: AppSettingWhereUniqueInput
   ): Promise<AppSetting | null> {
@@ -87,9 +123,18 @@ export class AppSettingControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: AppSetting })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "AppSetting",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async update(
     @common.Param() params: AppSettingWhereUniqueInput,
     @common.Body() data: AppSettingUpdateInput
@@ -120,6 +165,14 @@ export class AppSettingControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: AppSetting })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "AppSetting",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async delete(
     @common.Param() params: AppSettingWhereUniqueInput
   ): Promise<AppSetting | null> {

@@ -9,6 +9,10 @@ import { AppSettingList } from "./appSetting/AppSettingList";
 import { AppSettingCreate } from "./appSetting/AppSettingCreate";
 import { AppSettingEdit } from "./appSetting/AppSettingEdit";
 import { AppSettingShow } from "./appSetting/AppSettingShow";
+import { UserList } from "./user/UserList";
+import { UserCreate } from "./user/UserCreate";
+import { UserEdit } from "./user/UserEdit";
+import { UserShow } from "./user/UserShow";
 import { jwtAuthProvider } from "./auth-provider/ra-auth-jwt";
 
 const App = (): React.ReactElement => {
@@ -41,6 +45,13 @@ const App = (): React.ReactElement => {
           edit={AppSettingEdit}
           create={AppSettingCreate}
           show={AppSettingShow}
+        />
+        <Resource
+          name="User"
+          list={UserList}
+          edit={UserEdit}
+          create={UserCreate}
+          show={UserShow}
         />
       </Admin>
     </div>
